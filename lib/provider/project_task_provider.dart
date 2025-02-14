@@ -98,15 +98,14 @@ class TimeEntryProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Add a project
-  void addProject(String project) {
+    void addProject(String project) async {
     if (_projects.contains(project)) {
-      return; // Prevent duplicate projects
+    return; // Estä duplikaatit
     }
     _projects.add(project);
-    _saveDataToStorage();
-    notifyListeners();
-  }
+    _saveDataToStorage(); // Odota, että tallennus valmistuu ennen UI-päivitystä
+    notifyListeners(); // UI päivittyy vasta tallennuksen jälkeen
+    }
 
   // Delete a project
   void deleteProject(String project) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/timeEntry.dart';
-import '../provider/project_task_provider.dart';
+import 'package:time_tracker/models/timeEntry.dart';
+import 'package:time_tracker/provider/project_task_provider.dart';
 
 class AddTimeEntryScreen extends StatefulWidget {
   @override
@@ -27,42 +27,48 @@ class _AddTimeEntryScreenState extends State<AddTimeEntryScreen> {
           child: Column(
             children: <Widget>[
               // PROJECT DROPDOWN
-              DropdownButtonFormField<String>(
-                value: projectId != null && projectId!.isNotEmpty ? projectId : null, // Set to null if empty
-                onChanged: (String? newValue) {
-                  setState(() {
-                    projectId = newValue;
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Project'),
-                items: <String>['Project 1', 'Project 2', 'Project 3']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
+              Consumer<TimeEntryProvider>(
+                builder: (context, provider, child) {
+                  return DropdownButtonFormField<String>(
+                    value: projectId != null && projectId!.isNotEmpty ? projectId : null,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        projectId = newValue;
+                      });
+                    },
+                    decoration: InputDecoration(labelText: 'Project'),
+                    items: provider.projects.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    validator: (value) => value == null ? 'Please select a project' : null,
                   );
-                }).toList(),
-                validator: (value) => value == null ? 'Please select a project' : null,
+                },
               ),
               SizedBox(height: 16),
 
               // TASK DROPDOWN
-              DropdownButtonFormField<String>(
-                value: taskId != null && taskId!.isNotEmpty ? taskId : null,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    taskId = newValue;
-                  });
-                },
-                decoration: InputDecoration(labelText: 'Task'),
-                items: <String>['Task 1', 'Task 2', 'Task 3']
-                    .map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
+              Consumer<TimeEntryProvider>(
+                builder: (context, provider, child) {
+                  return DropdownButtonFormField<String>(
+                    value: taskId != null && taskId!.isNotEmpty ? taskId : null,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        taskId = newValue;
+                      });
+                    },
+                    decoration: InputDecoration(labelText: 'Task'),
+                    items: provider.tasks.map<DropdownMenuItem<String>>((Task task) {
+                      return DropdownMenuItem<String>(
+                        value: task.id,
+                        child: Text(task.name),
+                      );
+                    }).toList(),
+                    validator: (value) => value == null ? 'Please select a task' : null,
                   );
-                }).toList(),
-                validator: (value) => value == null ? 'Please select a task' : null,
+                },
               ),
               SizedBox(height: 16),
 
@@ -76,6 +82,26 @@ class _AddTimeEntryScreenState extends State<AddTimeEntryScreen> {
                   return null;
                 },
                 onSaved: (value) => totalTime = double.parse(value!),
+              ),
+              SizedBox(height: 16),
+
+              // DATE PICKER
+              ListTile(
+                title: Text('Date: ${date.toLocal()}'.split(' ')[0]),
+                trailing: Icon(Icons.calendar_today),
+                onTap: () async {
+                  DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: date,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2101),
+                  );
+                  if (picked != null && picked != date) {
+                    setState(() {
+                      date = picked;
+                    });
+                  }
+                },
               ),
               SizedBox(height: 16),
 
